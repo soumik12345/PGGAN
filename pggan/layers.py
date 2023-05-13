@@ -46,10 +46,30 @@ class WeightScaledDense(tf.keras.layers.Dense):
 
 
 class PixelNorm(tf.keras.layers.Layer):
-    def __init__(self, epsilon: float = 1e-8):
+    def __init__(self, epsilon: float = 1e-8, **kwargs):
+        super().__init__(**kwargs)
         self.epsilon = epsilon
 
     def call(self, inputs):
         return inputs / tf.sqrt(
             tf.reduce_mean(inputs**2, axis=-1, keepdims=True) + self.epsilon
         )
+
+
+class ConvolutionBlock(tf.keras.layers.Layer):
+    def __init__(self, filters: int, use_pixelnorm: bool = True, **kwargs):
+        super().__init__(**kwargs)
+        self.filters = filters
+        self.use_pixelnorm = use_pixelnorm
+
+    def build(self, input_shape):
+        self.convolution_1 = WeightScaledConv2D(filters=self.filters, kernel_size=3)
+        self.convolution_2 = WeightScaledConv2D(filters=self.filters, kernel_size=3)
+        self.leaky_relu = tf.keras.layers.LeakyReLU(alpha=0.2)
+        self.pixel_norm = PixelNorm()
+
+    def call(self, inputs):
+        x = self.leaky_relu(self.convolution_1(inputs))
+        x = self.pixel_norm(x) if self.use_pixelnorm else x
+        x = self.leaky_relu(self.convolution_2(x))
+        return self.pixel_norm(x) if self.use_pixelnorm else x
