@@ -33,13 +33,23 @@ class WeightScaledDense(tf.keras.layers.Dense):
         self.kernel_initializer = (
             tf.keras.initializers.RandomNormal(mean=0.0, stddev=1.0),
         )
-    
+
     def build(self, input_shape):
         input_channels = input_shape[-1]
         self.scale = tf.sqrt(self.gain / input_channels)
-    
+
     def call(self, inputs):
         x = tf.matmul(inputs, self.kernel * self.scale)
         if self.use_bias:
             x = tf.nn.bias_add(x, self.bias)
         return x
+
+
+class PixelNorm(tf.keras.layers.Layer):
+    def __init__(self, epsilon: float = 1e-8):
+        self.epsilon = epsilon
+
+    def call(self, inputs):
+        return inputs / tf.sqrt(
+            tf.reduce_mean(inputs**2, axis=-1, keepdims=True) + self.epsilon
+        )
