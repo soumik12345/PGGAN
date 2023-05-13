@@ -36,12 +36,12 @@ class WeightScaledConv2D(tf.keras.layers.Conv2D):
         self.scale = tf.sqrt(self.gain / fan_in)
 
     def call(self, inputs):
-        return (
-            tf.nn.conv2d(
-                input=inputs,
-                filters=self.weights * self.scale,
-                strides=self.strides,
-                padding=self.padding,
-            )
-            + self.bias
+        x = tf.nn.conv2d(
+            input=inputs,
+            filters=self.kernel * self.scale,
+            strides=self.strides,
+            padding=self.padding,
         )
+        if self.use_bias:
+            x = tf.nn.bias_add(x, self.bias)
+        return x
