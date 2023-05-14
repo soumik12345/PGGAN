@@ -8,8 +8,6 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 wandb = "^0.15.2"
-
-[tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
 wandb = "^0.15.2"
 pytest = "^7.3.1"
