@@ -84,7 +84,7 @@ class ProgressivelyGrowingDiscriminator(tf.keras.Model):
         self.rgb_layers.append(self.initial_rgb)
         self.average_pooling = tf.keras.layers.AveragePooling2D(pool_size=2, strides=2)
         self.final_block = DiscriminatorFinalBlock(filters=self.filters)
-    
+
     def fade_in(self, alpha, downscaled, output):
         return alpha * output + (1 - alpha) * downscaled
 
@@ -106,7 +106,7 @@ class ProgressivelyGrowingDiscriminator(tf.keras.Model):
         for step in range(current_step + 1, len(self.progressive_blocks)):
             output = self.progressive_blocks[step](output)
             output = self.average_pooling(output)
-        
+
         output = self.minibatch_std(output)
         output = self.final_block(output)
 
