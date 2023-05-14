@@ -8,11 +8,29 @@ class WeightScaledConv2D(tf.keras.layers.Conv2D):
         self.kernel_initializer = (
             tf.keras.initializers.RandomNormal(mean=0.0, stddev=1.0),
         )
+        self.bias_initializer = tf.keras.initializers.Zeros()
 
     def build(self, input_shape):
         input_channels = input_shape[-1]
-        fan_in = (self.kernel_size**2) * input_channels
+        fan_in = (self.kernel_size[0] * self.kernel_size[1]) * input_channels
         self.scale = tf.sqrt(self.gain / fan_in)
+        self.kernel = self.add_weight(
+            name="kernel",
+            shape=[
+                self.kernel_size[0],
+                self.kernel_size[1],
+                input_channels,
+                self.filters,
+            ],
+            initializer=self.kernel_initializer,
+            trainable=True,
+        )
+        self.bias = self.add_weight(
+            name="bias",
+            shape=(self.filters,),
+            initializer=self.bias_initializer,
+            trainable=True,
+        )
 
     def call(self, inputs):
         x = tf.nn.conv2d(
@@ -33,10 +51,23 @@ class WeightScaledDense(tf.keras.layers.Dense):
         self.kernel_initializer = (
             tf.keras.initializers.RandomNormal(mean=0.0, stddev=1.0),
         )
+        self.bias_initializer = tf.keras.initializers.Zeros()
 
     def build(self, input_shape):
         input_channels = input_shape[-1]
         self.scale = tf.sqrt(self.gain / input_channels)
+        self.kernel = self.add_weight(
+            name="kernel",
+            shape=[input_channels, self.units],
+            initializer=self.kernel_initializer,
+            trainable=True,
+        )
+        self.bias = self.add_weight(
+            name="bias",
+            shape=(self.units,),
+            initializer=self.bias_initializer,
+            trainable=True,
+        )
 
     def call(self, inputs):
         x = tf.matmul(inputs, self.kernel * self.scale)
