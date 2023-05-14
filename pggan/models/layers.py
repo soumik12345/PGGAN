@@ -5,10 +5,6 @@ class WeightScaledConv2D(tf.keras.layers.Conv2D):
     def __init__(self, filters, kernel_size, gain: int = 2, **kwargs):
         super().__init__(filters, kernel_size, **kwargs)
         self.gain = gain
-        self.kernel_initializer = (
-            tf.keras.initializers.RandomNormal(mean=0.0, stddev=1.0),
-        )
-        self.bias_initializer = tf.keras.initializers.Zeros()
 
     def build(self, input_shape):
         input_channels = input_shape[-1]
@@ -22,13 +18,13 @@ class WeightScaledConv2D(tf.keras.layers.Conv2D):
                 input_channels,
                 self.filters,
             ],
-            initializer=self.kernel_initializer,
+            initializer=tf.keras.initializers.RandomNormal(mean=0.0, stddev=1.0),
             trainable=True,
         )
         self.bias = self.add_weight(
             name="bias",
             shape=(self.filters,),
-            initializer=self.bias_initializer,
+            initializer=tf.keras.initializers.Zeros(),
             trainable=True,
         )
 
@@ -37,7 +33,7 @@ class WeightScaledConv2D(tf.keras.layers.Conv2D):
             input=inputs,
             filters=self.kernel * self.scale,
             strides=self.strides,
-            padding=self.padding,
+            padding=self.padding.upper(),
         )
         if self.use_bias:
             x = tf.nn.bias_add(x, self.bias)
@@ -48,10 +44,6 @@ class WeightScaledDense(tf.keras.layers.Dense):
     def __init__(self, units, gain: int = 2, **kwargs):
         super().__init__(units, **kwargs)
         self.gain = gain
-        self.kernel_initializer = (
-            tf.keras.initializers.RandomNormal(mean=0.0, stddev=1.0),
-        )
-        self.bias_initializer = tf.keras.initializers.Zeros()
 
     def build(self, input_shape):
         input_channels = input_shape[-1]
@@ -59,13 +51,13 @@ class WeightScaledDense(tf.keras.layers.Dense):
         self.kernel = self.add_weight(
             name="kernel",
             shape=[input_channels, self.units],
-            initializer=self.kernel_initializer,
+            initializer=tf.keras.initializers.RandomNormal(mean=0.0, stddev=1.0),
             trainable=True,
         )
         self.bias = self.add_weight(
             name="bias",
             shape=(self.units,),
-            initializer=self.bias_initializer,
+            initializer=tf.keras.initializers.Zeros(),
             trainable=True,
         )
 
