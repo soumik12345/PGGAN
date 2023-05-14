@@ -9,7 +9,6 @@ readme = "README.md"
 python = "^3.10"
 wandb = "^0.15.2"
 black = "^23.3.0"
-wandb = "^0.15.2"
 pytest = "^7.3.1"
 
 [build-system]
