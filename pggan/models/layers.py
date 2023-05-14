@@ -86,13 +86,16 @@ class ConvolutionBlock(tf.keras.layers.Layer):
         self.use_pixelnorm = use_pixelnorm
 
     def build(self, input_shape):
-        self.convolution_1 = WeightScaledConv2D(filters=self.filters, kernel_size=3)
-        self.convolution_2 = WeightScaledConv2D(filters=self.filters, kernel_size=3)
-        self.leaky_relu = tf.keras.layers.LeakyReLU(alpha=0.2)
+        self.convolution_1 = WeightScaledConv2D(
+            filters=self.filters, kernel_size=3, padding="same"
+        )
+        self.convolution_2 = WeightScaledConv2D(
+            filters=self.filters, kernel_size=3, padding="same"
+        )
         self.pixel_norm = PixelNorm()
 
     def call(self, inputs):
-        x = self.leaky_relu(self.convolution_1(inputs))
+        x = tf.nn.leaky_relu(self.convolution_1(inputs), alpha=0.2)
         x = self.pixel_norm(x) if self.use_pixelnorm else x
-        x = self.leaky_relu(self.convolution_2(x))
+        x = tf.nn.leaky_relu(self.convolution_2(x), alpha=0.2)
         return self.pixel_norm(x) if self.use_pixelnorm else x
