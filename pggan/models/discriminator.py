@@ -20,3 +20,25 @@ class MiniBatchStd(tf.keras.layers.Layer):
         avg_std = tf.reduce_mean(group_std, axis=[1, 2, 3], keepdims=True)
         x = tf.tile(avg_std, [group_size, h, w, 1])
         return tf.concat([inputs, x], axis=-1)
+
+
+class DiscriminatorFinalBlock(tf.keras.layers.Layer):
+    def __init__(self, filters: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.filters = filters
+
+    def build(self, input_shape):
+        self.weight_scaled_convolution_1 = WeightScaledConv2D(
+            filters=self.filters, kernel_size=3, strides=1, padding="same"
+        )
+        self.weight_scaled_convolution_2 = WeightScaledConv2D(
+            filters=self.filters, kernel_size=4, strides=1, padding="valid"
+        )
+        self.weight_scaled_convolution_3 = WeightScaledConv2D(
+            filters=1, kernel_size=1, strides=1, padding="valid"
+        )
+
+    def call(self, inputs):
+        x = tf.nn.leaky_relu(self.weight_scaled_convolution_1(inputs), alpha=0.2)
+        x = tf.nn.leaky_relu(self.weight_scaled_convolution_2(x), alpha=0.2)
+        return self.weight_scaled_convolution_3(x)
