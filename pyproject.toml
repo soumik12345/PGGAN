@@ -6,7 +6,7 @@ authors = ["Soumik Rakshit <19soumik.rakshit96@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.8"
 wandb = "^0.15.2"
 black = "^23.3.0"
 pytest = "^7.3.1"
