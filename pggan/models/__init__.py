@@ -1,1 +1,2 @@
 from .generator import ProgressivelyGrowingGenerator
+from .discriminator import ProgressivelyGrowingDiscriminator
